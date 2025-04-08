@@ -24,6 +24,7 @@ import { AutoRedis } from '@app/decorator';
 import Redis, { Cluster } from 'ioredis';
 import { ID_COUNTER } from '@app/constant';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { RequireClientPairGuard } from '../libs/guard/require-client-pair';
 
 const permissions = [
   'CLIENT::GET::LIST',
@@ -103,6 +104,10 @@ const permissions = [
     {
       provide: APP_GUARD,
       useClass: PermissionGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RequireClientPairGuard,
     },
   ],
 })

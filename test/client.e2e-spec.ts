@@ -5,7 +5,7 @@ import {
 import { createUser } from './utils/create-user';
 import { clear } from './utils/setup';
 import { AppModule } from '../src/app.module';
-import { HttpStatus, INestApplication, Logger } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import Redis from 'ioredis';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
@@ -21,9 +21,7 @@ describe('Client E2E test', () => {
   beforeEach(async () => {
     const moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      .setLogger(new Logger())
-      .compile();
+    }).compile();
     app = moduleFixture.createNestApplication();
     redis = app.get(getRedisToken(DEFAULT_REDIS_NAMESPACE));
     await clear('sqlite');

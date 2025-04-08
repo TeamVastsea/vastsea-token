@@ -6,5 +6,6 @@ import { ClientCache } from './client.cache';
 @Module({
   controllers: [ClientController],
   providers: [ClientService, ClientCache],
+  exports: [ClientService],
 })
 export class ClientModule {}

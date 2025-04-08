@@ -2,7 +2,7 @@ import {
   getRedisToken,
   DEFAULT_REDIS_NAMESPACE,
 } from '@liaoliaots/nestjs-redis';
-import { HttpStatus, INestApplication, Logger } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { clear } from './utils/setup';
 import Redis from 'ioredis';
@@ -44,9 +44,7 @@ describe('Role And Permission end to end test', () => {
   beforeEach(async () => {
     const moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      .setLogger(new Logger())
-      .compile();
+    }).compile();
     app = moduleFixture.createNestApplication();
     redis = app.get(getRedisToken(DEFAULT_REDIS_NAMESPACE));
     service = app.get(RoleService);

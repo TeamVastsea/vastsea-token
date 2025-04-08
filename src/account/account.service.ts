@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateAccount } from './dto/create-account';
 import { pbkdf2Sync, randomBytes } from 'crypto';
-import { AUTH_EMAIL_CODE, ID_COUNTER } from '@app/constant';
+import { AUTH_EMAIL_CODE, ID_COUNTER, TOKEN_PAIR } from '@app/constant';
 import { PrismaService } from '@app/prisma';
 import { AutoRedis } from '@app/decorator';
 import Redis, { Cluster } from 'ioredis';
@@ -64,7 +64,11 @@ export class AccountService {
     }
     await this.redis.del(AUTH_EMAIL_CODE(email));
   }
-
+  getAccountInfo(id: bigint) {
+    return this.prisma.account.findFirst({
+      where: { id },
+    });
+  }
   hashPwd(password: string, salt: string, iterations: number) {
     return pbkdf2Sync(password, salt, iterations, 64, 'sha512').toString('hex');
   }
@@ -103,5 +107,11 @@ export class AccountService {
       )
       .then(() => this.redis.ttl(AUTH_EMAIL_CODE(email)))
       .catch((err) => this.logger.error(err.message, err.stack));
+  }
+  async userOnline(clientId: string, userId: bigint) {
+    if (!(await this.getAccountInfo(userId))) {
+      throw new HttpException('用户不存在', HttpStatus.NOT_FOUND);
+    }
+    return this.redis.exists(TOKEN_PAIR(userId.toString(), clientId, 'access'));
   }
 }

@@ -108,7 +108,13 @@ export class ClientService {
     });
     return { total, data };
   }
-
+  async findClientByClientId(clientId: string) {
+    return this.prisma.client.findFirst({
+      where: {
+        clientId,
+      },
+    });
+  }
   private sha256(value: string): string {
     return createHash('sha256').update(value).digest('hex');
   }
