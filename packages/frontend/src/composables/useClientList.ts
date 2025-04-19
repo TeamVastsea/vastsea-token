@@ -18,18 +18,23 @@ export interface ClientInfo extends Client {
 }
 export interface UseClientListProps {
   size: number;
+  type?: 'scroll' | 'page';
 }
 export function useClientList(
-  { fetcher, size: _size }: CommonComposablesProps & UseClientListProps = {
+  { fetcher: _fecther, size: _size, type }: Partial<CommonComposablesProps> & UseClientListProps = {
     fetcher: instance,
     size: 20,
+    type: 'page',
   },
 ) {
+  const fetcher = _fecther ?? instance;
   const loading = ref(false);
   const data: Ref<ClientInfo[]> = ref([]);
   const preId: Ref<undefined | string> = ref(undefined);
   const size: Ref<number> = ref(_size);
   const total = ref(0);
+  const curPage = ref(1);
+  const canLoad = ref(false);
 
   // page -> preId
   const preIdRecord = new Map<number, string>();
@@ -42,8 +47,14 @@ export function useClientList(
       }).json,
     })
       .then((resp) => {
-        data.value = resp.data;
+        if (type === 'page') {
+          data.value = resp.data;
+        }
+        if (type === 'scroll') {
+          data.value.push(...resp.data);
+        }
         total.value = Number.parseInt(resp.total.toString());
+        canLoad.value = data.value.length < total.value;
         return resp;
       })
       .finally(() => {
@@ -59,6 +70,13 @@ export function useClientList(
     preId.value = preIdRecord.get(page);
     return getList();
   };
+  const loadMore = () => {
+    if (!canLoad.value) {
+      return;
+    }
+    curPage.value += 1;
+    loadNext(curPage.value);
+  };
   const setSize = (newSize: number) => {
     size.value = newSize;
     preId.value = undefined;
@@ -66,5 +84,5 @@ export function useClientList(
     preIdRecord.clear();
     return getList();
   };
-  return { getList, loadNext, loadPrev, setSize, loading, data, total, size };
+  return { getList, loadNext, loadPrev, setSize, loadMore, canLoad, loading, data, total, size };
 }
