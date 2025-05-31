@@ -10,6 +10,7 @@ import {
   TinyOption,
   TinySelect,
 } from '@opentiny/vue';
+import { vElementVisibility } from '@vueuse/components';
 import { computed, reactive, ref, useTemplateRef, watch } from 'vue';
 
 const emits = defineEmits<{
@@ -18,7 +19,7 @@ const emits = defineEmits<{
 
 const client = ref<{ clientId: string; name: string }[]>([]);
 
-const { getRoleList, roleList, createRole } = useRole({ type: 'scroll' });
+const { getRoleList, roleList, createRole, loadMore: loadMoreRole } = useRole({ type: 'scroll' });
 
 const formData: CreateRole = reactive({
   name: '',
@@ -29,7 +30,7 @@ const formData: CreateRole = reactive({
 });
 
 const form = useTemplateRef<Form>('form');
-const { permissionList, getPermissionList } = usePermission({
+const { permissionList, getPermissionList, loadMore } = usePermission({
   type: 'scroll',
   size: 5,
 });
@@ -82,6 +83,18 @@ const batchCreateRole = () => {
     })
     .catch(() => {});
 };
+const onBottom = () => {
+  if (!clientId.value.length) {
+    return;
+  }
+  loadMore(clientId.value[0]);
+};
+const onParentButton = () => {
+  if (!clientId.value.length) {
+    return;
+  }
+  loadMoreRole(clientId.value[0]);
+};
 watch(
   clientId,
   () => {
@@ -131,6 +144,7 @@ watch(
             :label="item.label"
             :value="item.value"
           />
+          <div v-element-visibility="onBottom" />
         </tiny-select>
       </tiny-form-item>
       <tiny-form-item label="父级角色">
@@ -141,6 +155,7 @@ watch(
             :label="item.label"
             :value="item.value"
           />
+          <div v-element-visibility="onParentButton" />
         </tiny-select>
       </tiny-form-item>
       <tiny-form-item>

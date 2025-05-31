@@ -41,6 +41,7 @@ export function usePermission(
   const loading = ref(false);
   const preId = ref<string | undefined>();
   const curPage = ref(1);
+  const canLoad = ref(true);
 
   // page -> preId;
   const pagePreId = new Map<number, string>();
@@ -79,6 +80,7 @@ export function usePermission(
           }
         }
         permissionTotal.value = resp.total.toString();
+        canLoad.value = Boolean(resp.data.length);
       })
       .finally(() => {
         loading.value = false;
@@ -146,6 +148,9 @@ export function usePermission(
     preId.value = undefined;
   };
   const loadMore = (clientId: string) => {
+    if (loading.value || !canLoad.value) {
+      return;
+    }
     preId.value = pagePreId.get(curPage.value);
     clickNext(curPage.value + 1);
     getPermissionList(clientId, preId.value);

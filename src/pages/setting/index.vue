@@ -47,7 +47,7 @@ import { Link as UiLink } from '@/components/ui';
             安全管理
           </ui-link>
         </div>
-        <div class="calc(var(--spacing)_*_16))] h-[calc(100%_-_ w-full md:h-full">
+        <div class="h-[calc(100%_-_calc(var(--spacing)_*_16))] w-full md:h-full">
           <router-view />
         </div>
       </div>

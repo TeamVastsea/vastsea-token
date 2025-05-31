@@ -2,6 +2,7 @@
 import { useInfiniteAccountList } from '@/composables';
 import { TinyOption, TinySelect } from '@opentiny/vue';
 import InfiniteScroll from '@opentiny/vue-renderless/common/deps/infinite-scroll';
+import { vElementVisibility } from '@vueuse/components';
 import { onMounted, ref, watch } from 'vue';
 
 const { data, load, loadMore, isLoading } = useInfiniteAccountList();
@@ -35,5 +36,6 @@ onMounted(() => {
       :value="option.id"
       :label="option.profile.nick"
     />
+    <div v-element-visibility="loadMore" />
   </tiny-select>
 </template>

@@ -55,6 +55,10 @@ export function useRole(
   const preId = ref<string | undefined>();
   const pagePreid = new Map<number, string | undefined>();
   const clientId = ref<string | undefined>();
+
+  const canLoad = ref(true);
+  const loading = ref(false);
+
   const createRole = (data: MaybeRef<CreateRole>) => {
     return fetcher.post<never, MininalRole>('/role', unref(data));
   };
@@ -67,6 +71,7 @@ export function useRole(
       clientId: undefined,
     },
   ) => {
+    loading.value = true;
     return fetcher
       .get<unknown, List<MininalRole>>(`/role`, {
         params: {
@@ -86,6 +91,10 @@ export function useRole(
           roleList.value.push(...newData);
         }
         roleTotal.value = resp.total.toString();
+        canLoad.value = Boolean(resp.data.length);
+      })
+      .finally(() => {
+        loading.value = false;
       });
   };
   const updateRole = (
@@ -97,6 +106,9 @@ export function useRole(
   const setPage = (page: number, type: 'next' | 'prev') => {
     curPage.value = page;
     if (type === 'next') {
+      if (!roleList.value[roleList.value.length-1]) {
+        return;
+      }
       const id = roleList.value[roleList.value.length - 1].id;
       pagePreid.set(page, id);
       preId.value = id;
@@ -114,6 +126,13 @@ export function useRole(
   };
   const setClientId = (target?: string) => {
     clientId.value = target;
+  };
+  const loadMore = (clientId?: string) => {
+    if (loading.value || !canLoad.value) {
+      return;
+    }
+    setClientId(clientId);
+    setPage(curPage.value + 1, 'next');
   };
   watch(
     [preId, roleListPageSize, curPage, clientId],
@@ -137,5 +156,6 @@ export function useRole(
     setClientId,
     getRoleInfo,
     updateRole,
+    loadMore,
   };
 }
