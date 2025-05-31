@@ -10,6 +10,7 @@ export function useInfiniteAccountList(
   const data = ref<MininalAccount[]>([]);
   const total = ref<string>('-1');
   const isLoading = ref(true);
+  const canLoad = ref(false);
 
   const load = () => {
     isLoading.value = true;
@@ -28,6 +29,7 @@ export function useInfiniteAccountList(
         );
         data.value.push(...newData);
         total.value = resp.total.toString();
+        canLoad.value = data.value.length < Number.parseInt(total.value);
       })
       .finally(() => {
         isLoading.value = false;
@@ -35,7 +37,9 @@ export function useInfiniteAccountList(
   };
 
   const loadMore = () => {
-    if (!data.value.length || data.value.length.toString() === total.value) {
+    if (
+      isLoading.value || !canLoad.value
+    ) {
       return;
     }
     preId.value = BigInt(data.value[data.value.length - 1].id);
